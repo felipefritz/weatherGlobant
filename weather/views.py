@@ -11,7 +11,7 @@ from .utils import kelvin_to_celcius, kelvin_to_fahrenheit
 def _get_weather_from__external_api(query: dict):
     """
 
-    :param query: A dictionary with city and country_code as keys.
+    :param query: A dictionary with city and country as keys.
     :return: A json object with the weather for the specified city
     """
     url = f'https://api.openweathermap.org/data/2.5/weather?q=' \
@@ -22,7 +22,7 @@ def _get_weather_from__external_api(query: dict):
     response = requests.get(url=url)
 
     if response.status_code == 404:
-        return {'error': 'no data available'}
+         return {'error': 'not found'}
 
     data = response.json()
     return data
@@ -30,6 +30,7 @@ def _get_weather_from__external_api(query: dict):
 
 def _build_api_schema(external_weither_data):
     coordinates = list()
+
     coordinates.append(external_weither_data['coord']['lat'])
     coordinates.append(external_weither_data['coord']['lon'])
 
@@ -87,10 +88,18 @@ def get_weather(request):
         query['country'] = request.query_params['country']
         query['city'] = request.query_params['city']
 
-        response_from_api = _get_weather_from__external_api(query)
-        response = _build_api_schema(response_from_api)
+        try:
+            response_from_api = _get_weather_from__external_api(query)
 
-        return Response(response, status=status.HTTP_200_OK, )
+            if 'error' in response_from_api:
+                return Response( response_from_api, status=status.HTTP_404_NOT_FOUND)
+
+            response = _build_api_schema(response_from_api)
+            return Response(response, status=status.HTTP_200_OK, )
+
+        except Exception as e:
+            return Response({'unexpected error:': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 
