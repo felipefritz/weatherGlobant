@@ -14,6 +14,12 @@ Install git and python in your machine
 
 4.- Execute the following command:  pip install -r requirements.txt
 
+5.- Create a .env file in the root folder and add:
+
+  # SECRET_KEY ( you can find it in settings.py)
+  
+  # appid= (appid from https://openweathermap.org/ . you must to create an account)
+
 5.- Execute the following command: python manage.py migrate
 
 6.- Finally execute: python manage.py runserver
